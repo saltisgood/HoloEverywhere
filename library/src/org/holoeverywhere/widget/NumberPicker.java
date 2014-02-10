@@ -123,6 +123,8 @@ public class NumberPicker extends LinearLayout {
     private VelocityTracker mVelocityTracker;
     private boolean mWrapSelectorWheel;
 
+    private boolean mIsEditable = true;
+
     public NumberPicker(Context context) {
         this(context, null);
     }
@@ -1068,6 +1070,11 @@ public class NumberPicker extends LinearLayout {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
+    }
+
+    public void setEditable(boolean enabled) {
+        mIsEditable = enabled;
+        mInputText.setCursorVisible(enabled);
     }
 
     @Override
