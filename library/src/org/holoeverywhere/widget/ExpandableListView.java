@@ -43,9 +43,18 @@ public class ExpandableListView extends ListView {
                              int childPosition, long id);
     }
 
+    public interface OnChildLongClickListener {
+        boolean onChildLongClick(ExpandableListView parent, View v, int groupPosition,
+                                 int childPosition, long id);
+    }
+
     public interface OnGroupClickListener {
         boolean onGroupClick(ExpandableListView parent, View v, int groupPosition,
                              long id);
+    }
+
+    public interface OnGroupLongClickListener {
+        boolean onGroupLongClick(ExpandableListView parent, View v, int groupPosition, long id);
     }
 
     public interface OnGroupCollapseListener {
@@ -181,6 +190,9 @@ public class ExpandableListView extends ListView {
     private OnGroupClickListener mOnGroupClickListener;
     private OnGroupCollapseListener mOnGroupCollapseListener;
     private OnGroupExpandListener mOnGroupExpandListener;
+
+    private OnChildLongClickListener mOnChildLongClickListener;
+    private OnGroupLongClickListener mOnGroupLongClickListener;
 
     public ExpandableListView(Context context) {
         this(context, null);
@@ -492,6 +504,32 @@ public class ExpandableListView extends ListView {
         return returnValue;
     }
 
+    boolean handleItemLongClick(View v, int position, long id) {
+        final PositionMetadata posMetadata = mConnector.getUnflattenedPos(position);
+        id = getChildOrGroupId(posMetadata.position);
+        boolean returnValue;
+        if (posMetadata.position.type == ExpandableListPosition.GROUP) {
+            if (mOnGroupLongClickListener != null) {
+                if (mOnGroupLongClickListener.onGroupLongClick(this, v,
+                        posMetadata.position.groupPos, id)) {
+                    posMetadata.recycle();
+                    return true;
+                }
+            }
+            // Don't expand/ contract
+            returnValue = true;
+        } else {
+            if (mOnChildLongClickListener != null) {
+                playSoundEffect(SoundEffectConstants.CLICK);
+                return mOnChildLongClickListener.onChildLongClick(this, v, posMetadata.position.groupPos,
+                        posMetadata.position.childPos, id);
+            }
+            returnValue = false;
+        }
+        posMetadata.recycle();
+        return returnValue;
+    }
+
     public boolean isGroupExpanded(int groupPosition) {
         return mConnector.isGroupExpanded(groupPosition);
     }
@@ -540,6 +578,15 @@ public class ExpandableListView extends ListView {
         }
         final int adjustedPosition = getFlatPositionForConnector(position);
         return handleItemClick(v, adjustedPosition, id);
+    }
+
+    @Override
+    public boolean performItemLongClick(View v, int position, long id) {
+        if (isHeaderOrFooterPosition(position)) {
+            return super.performItemLongClick(v, position, id);
+        }
+        final int adjustedPosition = getFlatPositionForConnector(position);
+        return handleItemLongClick(v, adjustedPosition, id);
     }
 
     public void setAdapter(ExpandableListAdapter adapter) {
@@ -595,6 +642,14 @@ public class ExpandableListView extends ListView {
 
     public void setOnGroupClickListener(OnGroupClickListener onGroupClickListener) {
         mOnGroupClickListener = onGroupClickListener;
+    }
+
+    public void setOnGroupLongClickListener(OnGroupLongClickListener onGroupLongClickListener) {
+        mOnGroupLongClickListener = onGroupLongClickListener;
+    }
+
+    public void setOnChildLongClickListener(OnChildLongClickListener onChildLongClickListener) {
+        mOnChildLongClickListener = onChildLongClickListener;
     }
 
     public void setOnGroupCollapseListener(
