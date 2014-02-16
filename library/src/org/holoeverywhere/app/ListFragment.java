@@ -37,6 +37,8 @@ public class ListFragment extends Fragment {
         }
     };
     private TextView mStandardEmptyView;
+    private boolean mIsFocused = false;
+    private boolean mIsExiting = false;
 
     private void ensureList() {
         if (mList != null) {
@@ -213,5 +215,28 @@ public class ListFragment extends Fragment {
     public void setSelection(int position) {
         ensureList();
         mList.setSelection(position);
+    }
+
+    protected final void setFocused(boolean val) {
+        mIsFocused = val;
+    }
+
+    public final boolean isFocused() {
+        return mIsFocused;
+    }
+
+    public final boolean isExiting() {
+        return mIsExiting;
+    }
+
+    public void popFragment() {
+        mIsExiting = true;
+        this.getFragmentManager().popBackStack();
+
+        onFragmentPopped();
+    }
+
+    protected void onFragmentPopped() {
+        mIsFocused = false;
     }
 }
