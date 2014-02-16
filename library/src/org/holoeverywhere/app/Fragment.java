@@ -17,6 +17,8 @@ public class Fragment extends _HoloFragment {
     private final IAddonBasicAttacher<IAddonFragment, Fragment> mAttacher =
             new IAddonBasicAttacher<IAddonFragment, Fragment>(this);
     private LayoutInflater mLayoutInflater;
+    private boolean mIsFocused = false;
+    private boolean mIsExiting = false;
 
     public static <T extends Fragment> T instantiate(Class<T> clazz) {
         return instantiate(clazz, null);
@@ -148,5 +150,28 @@ public class Fragment extends _HoloFragment {
     @Override
     public boolean performAddonAction(AddonCallback<IAddonFragment> callback) {
         return mAttacher.performAddonAction(callback);
+    }
+
+    protected final void setFocused(boolean val) {
+        mIsFocused = val;
+    }
+
+    public final boolean isFocused() {
+        return mIsFocused;
+    }
+
+    public final boolean isExiting() {
+        return mIsExiting;
+    }
+
+    public void popFragment() {
+        mIsExiting = true;
+        this.getFragmentManager().popBackStack();
+
+        onFragmentPopped();
+    }
+
+    protected void onFragmentPopped() {
+        mIsFocused = false;
     }
 }
