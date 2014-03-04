@@ -174,4 +174,16 @@ public class Fragment extends _HoloFragment {
     protected void onFragmentPopped() {
         mIsFocused = false;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mIsFocused = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mIsFocused = false;
+    }
 }
